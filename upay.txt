@@ -1,0 +1,538 @@
+blueprint_content = """================================================================================
+UPAY & USAFE PLATFORM BLUEPRINT: NEXT-GEN AUTONOMOUS MULTI-RAIL PAYMENT GATEWAY
+Target Horizons: 2026 – 2030 | Unified Wallet, Web Store 2030, uChat v1 & OpenClaw
+================================================================================
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & CORE ARCHITECTURAL PHILOSOPHY
+2. END-TO-END SYSTEM ARCHITECTURE & FLOW DIAGRAMS
+3. CONSUMER WALLET SPECIFICATION & UX WIREFRAMES
+4. MERCHANT GATEWAY & DEVELOPER CORE FEATURES
+5. MULTI-PLATFORM API KEY MANAGEMENT & TOKEN VAULT
+6. WEB STORE 2030: NEXT-GEN STOREFRONT SPECIFICATION
+7. LOCAL BUSINESS PLAYBOOK: ELIMINATING FEES & 2030 READINESS
+8. OPENCLAW AGENTIC COMMERCE SKILL SPECIFICATION (SKILL.MD & RUNTIME)
+9. UCHAT V1 MESSAGING INTEGRATION & IN-CHAT P2P SETTLEMENT
+10. REST API & WEBHOOK TECHNICAL SPECIFICATIONS (V1)
+11. COMMERCIAL PRICING ARCHITECTURE & 3-YEAR FINANCIAL MODEL
+--------------------------------------------------------------------------------
+
+
+================================================================================
+1. EXECUTIVE SUMMARY & CORE ARCHITECTURAL PHILOSOPHY
+================================================================================
+Current payment ecosystems are fragmented across legacy card rails (Visa/Mastercard),
+closed-loop digital wallets, domestic instant bank rails (UPI, FedNow, SEPA Instant),
+and emerging tokenized liquidity bridges. Traditional payment gateways extract 
+1.5% to 3.5% + $0.30 per transaction in domestic interchange, escalating to 
+3.5% to 5.5% on cross-border transactions through opaque foreign exchange (FX) 
+markups and multi-day clearing delays.
+
+UPay is an autonomous, intent-driven, multi-rail mobile and web payment gateway 
+engineered to eliminate intermediary surcharges, latency bottlenecks, and 
+centralized data compliance liabilities.
+
+Key Pillars:
+- Zero-Latency Intent Routing: Real-time telemetry selects optimal settlement rails
+  based on fee, network latency, and acceptance probability.
+- Zero-Spread Local FX Abstraction: Consumers and merchants view, settle, and hold
+  balances in their preferred local currency, converted via wholesale interbank
+  liquidity with no retail markups.
+- Zero-Knowledge Identity (uSafe SSO): KYC, sanctions screening, and AML checks are
+  verified via hardware-backed Zero-Knowledge proofs (zkJWT) on-device, eliminating
+  PCI-DSS Level 1 data storage risks for merchant backends.
+- Agentic & Machine-to-Machine (M2M) Native: Micro-metered payment rails enable
+  autonomous AI agents (e.g., OpenClaw) to clear sub-cent transactions securely.
+
+
+================================================================================
+2. END-TO-END SYSTEM ARCHITECTURE & FLOW DIAGRAMS
+================================================================================
+
+HIGH-LEVEL COMPONENT TOPOLOGY:
+
++-----------------------------------------------------------------------------+
+|                                CLIENT LAYER                                 |
+|  [Consumer Wallet App]  [uChat v1 Inline Bubble]  [Web Store 2030 Plugin]   |
++-----------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------+
+|                     AUTHENTICATION & ACCESS LAYER                           |
+|      uSafe SSO Enclave (WebAuthn / Passkey / Biometrics / zkJWT Tokens)      |
++-----------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------+
+|                           UPAY CORE INTELLIGENCE                            |
+|  +------------------------+  +--------------------+  +--------------------+ |
+|  | Autonomous Smart Router|  | Real-Time FX Oracle|  | Risk & zk-Fraud    | |
+|  | - Evaluates rail health|  | - Zero-spread rates|  | - Local telemetry  | |
+|  | - Lowest cost selection|  | - 30s-60s lock-in  |  | - Anomaly scoring  | |
+|  +------------------------+  +--------------------+  +--------------------+ |
++-----------------------------------------------------------------------------+
+                                       |
+                                       v
++-----------------------------------------------------------------------------+
+|                          SETTLEMENT & RAIL ENGINES                          |
+|  [Domestic Direct (UPI)]   [Cross-Border Liquidity]   [Offline BLE Mesh]    |
++-----------------------------------------------------------------------------+
+
+TRANSACTION FLOW SEQUENCE:
+1. Client App / Web Store requests payment intent via UPay API.
+2. uSafe SSO validates user device via Secure Enclave biometric passkey (zkJWT issued).
+3. UPay AI Engine evaluates live gas fees, FX rates, and bank rail availability.
+4. Engine locks mid-market exchange rate and presents dual-currency quote to user.
+5. User confirms transaction via single biometric touch/face prompt.
+6. Atomic settlement occurs across target rail; merchant receives instant webhook.
+7. Cryptographic settlement receipt is generated and distributed.
+
+
+================================================================================
+3. CONSUMER WALLET SPECIFICATION & UX WIREFRAMES
+================================================================================
+
+Core Principles:
+- Universal Balance Abstraction: Display one primary balance in user's home currency.
+- Dynamic FX Display: Automatic conversion of foreign multi-currency pockets.
+- Monospaced Numeric Typography: Prevents UI layout shifts during live rate updates.
+
+WIREFRAME: HOME DASHBOARD & UNIFIED BALANCE CARD
+--------------------------------------------------------------------------------
+| [uSafe zkID Check]        UPay SafeVault               [QR / Mesh Scanner]   |
+|------------------------------------------------------------------------------|
+|  TOTAL SPENDABLE BALANCE (Home Currency: INR)                                |
+|  Rs. 1,48,250.00                                                             |
+|  ^ +0.42% (Real-Time Aggregate FX Yield)                                     |
+|                                                                              |
+|  [⚡ Auto-Route: Active (Prioritizing Lowest Network Fee)]                    |
+|                                                                              |
+|  [ + Top Up ]            [ <-> Quick Swap ]            [ -> Send / Pay ]     |
+|------------------------------------------------------------------------------|
+| MULTI-CURRENCY SUB-POCKETS                                      [Manage +]   |
+|                                                                              |
+|  [IND] Rs. 85,000.00 INR    Domestic Checking Direct         * Primary       |
+|  [USA] $620.50 USD          (~Rs. 51,811.00 INR)             * Yield 4.1%    |
+|  [EUR] EUR 125.00           (~Rs. 11,439.00 INR)             * Instant Hold  |
+|------------------------------------------------------------------------------|
+| RECENT ACTIVITY & TELEMETRY                                                  |
+|                                                                              |
+|  - Figma Inc. (Annual Sub)      - $45.00 USD (~Rs. 3,764.70)   Settled 2m ago|
+|    Rail: Stable FX Bridge       FX Saved: Rs. 188.20 vs Cards                |
+|                                                                              |
+|  - Artisan Cafe Local           - Rs. 240.00 INR               Settled Today |
+|    Rail: Instant UPI Direct     Latency: 140ms                               |
+--------------------------------------------------------------------------------
+
+WIREFRAME: IN-APP HEADLESS CHECKOUT SHEET (MERCHANT POPUP)
+--------------------------------------------------------------------------------
+|                      [ UPay Secure FastCheckout ]                            |
+|  Merchant: GitHub Global Services                                            |
+|  Order ID: #ORD-2026-9941                                                    |
+|                                                                              |
+|  AMOUNT DUE (MERCHANT CURRENCY):  $ 21.00 USD                                |
+|  AMOUNT DUE (LOCAL BASE RATE):    Rs. 1,756.86 INR                           |
+|  Exchange Rate: $1.00 = Rs. 83.66 (Zero Markup Guarantee: 28s remaining)     |
+|------------------------------------------------------------------------------|
+| PAYMENT SOURCE SELECTION:                                                    |
+|  (*) Smart Auto-Split (Uses $21.00 from USD Pocket - No Conversion Needed)   |
+|  ( ) Local Checking Account Direct Debit via Instant Bank Rail               |
+|------------------------------------------------------------------------------|
+| AUTHENTICATION:                                                              |
+|                     [ ((( Touch ID / Face ID ))) ]                           |
+|                          Double-Click to Confirm                             |
+|  Secured by Hardware Enclave Passkey (uSafe zkKYC Compliant)                |
+--------------------------------------------------------------------------------
+
+
+================================================================================
+4. MERCHANT GATEWAY & DEVELOPER CORE FEATURES
+================================================================================
+
+1. Predictive Dynamic Routing:
+   - Continuously monitors live latency across 40+ domestic and international rails.
+   - If local bank API response time degrades beyond 800ms, automatically switches
+     to tokenized fiat equivalents without failing the checkout.
+
+2. Headless Drop-In SDKs:
+   - Zero-redirect checkout: no webviews, third-party redirects, or SMS delays.
+   - Available across Swift (iOS), Kotlin (Android), Flutter, React Native, and Wasm.
+
+3. Zero-Knowledge Compliance (zkKYC):
+   - Cryptographic attestations stored on the user's mobile device secure enclave.
+   - Proves customer identity, age, and AML clearance without transferring raw PII
+     to the merchant server.
+
+4. Sub-Second Offline Mode:
+   - Uses Bluetooth Low Energy (BLE) and encrypted peer-to-peer ledgers.
+   - Authorizes offline transactions up to pre-allocated cryptographic risk limits,
+     clearing immediately once network connectivity returns.
+
+5. Agentic AI & Machine-to-Machine Endpoints:
+   - Built-in rate limiting and spending envelope guards for autonomous agents.
+   - Fixed sub-cent transaction processing fees ($0.002 flat).
+
+
+================================================================================
+5. MULTI-PLATFORM API KEY MANAGEMENT & TOKEN VAULT
+================================================================================
+
+To ensure safe deployment across Shopify, WooCommerce, custom web backends, 
+mobile apps, and AI agents, UPay utilizes Hierarchical Deterministic (HD) keys.
+
+KEY TYPES & SPECIFICATION:
+1. Publishable Key (upay_pub_live_...):
+   - Client-side safe. Used in mobile app frontends and web checkouts.
+   - Allowed permissions: create_session, read_exchange_rates, query_terminal.
+2. Restricted Agent Key (upay_agent_live_...):
+   - Scoped for autonomous LLM bots and OpenClaw agents.
+   - Allowed permissions: execute_micro_pay, query_order_status.
+   - Enforces daily budget caps (e.g., maximum $25.00/day).
+3. Secret Server Key (upay_sec_live_...):
+   - Server-side only. Requires IP whitelisting and mutual TLS.
+   - Allowed permissions: capture_funds, initiate_refund, manage_payouts.
+4. POS Terminal Key (upay_pos_live_...):
+   - Installed on retail Android/iOS tablets or soundbox hardware.
+   - Enables offline BLE mesh synchronization and dynamic QR rendering.
+
+MIDDLEWARE KEY VALIDATION ALGORITHM (PSEUDOCODE):
+--------------------------------------------------------------------------------
+function validateUpayApiKey(request):
+    key = extractHeader(request, "X-UPay-Api-Key")
+    if not key or not isValidFormat(key):
+        return reject(401, "ERR_INVALID_KEY_FORMAT")
+        
+    cachedScope = Redis.get("key_scope:" + sha256(key))
+    if not cachedScope:
+        cachedScope = Database.fetchKeyMetadata(key)
+        Redis.setex("key_scope:" + sha256(key), 300, cachedScope)
+        
+    if cachedScope.isRevoked:
+        return reject(403, "ERR_KEY_REVOKED")
+        
+    if request.path in RESTRICTED_ENDPOINTS and not cachedScope.canExecuteAdmin:
+        return reject(403, "ERR_UNAUTHORIZED_SCOPE")
+        
+    if cachedScope.isAgentKey:
+        currentSpend = Redis.get("agent_spend:" + cachedScope.id + ":" + today())
+        if currentSpend + request.amount > cachedScope.dailyBudgetCap:
+            return reject(429, "ERR_AGENT_BUDGET_EXCEEDED")
+            
+    return proceed(cachedScope)
+--------------------------------------------------------------------------------
+
+
+================================================================================
+6. WEB STORE 2030: NEXT-GEN STOREFRONT SPECIFICATION
+================================================================================
+
+By 2030, web stores will transcend static cart checkouts. UPay Web Store 2030
+provides native infrastructure for spatial computing, autonomous shopping,
+and invisible authentication.
+
+Key Modules:
+1. Spatial & Invisible Passkey Auth:
+   - WebAuthn / FIDO2 integration natively embedded in WebXR / spatial vision apps.
+   - Confirmation is achieved via gaze, iris, or biometric tap. No passwords or OTPs.
+2. AI-Driven Dynamic Basket Negotiation:
+   - Storefront APIs allow customer AI shopping agents to negotiate quantity
+     discounts and bundled shipping in real time using standardized intent schemas.
+3. Mid-Market Foreign Exchange Locking:
+   - Automatic geodiversity detection displays prices in the shopper's local fiat.
+   - Guaranteed exchange rates hold for 60 seconds at checkout without FX markups.
+4. Composable Headless Plugins:
+   - Lightweight drop-ins for Next.js, Nuxt, Shopify Hydrogen, and WooCommerce.
+   - Zero-iframe architecture ensures instant paint and zero checkout drop-off.
+
+
+================================================================================
+7. LOCAL BUSINESS PLAYBOOK: ELIMINATING FEES & 2030 READINESS
+================================================================================
+
+Pain Points for Local Businesses:
+- POS Terminal Hardware Rentals: Costing $10 to $30/month per terminal.
+- Excessive Merchant Discount Rates: 1.5% to 3.0% on domestic cards; up to 4.5%
+  on foreign tourist cards.
+- T+1 / T+2 Settlement Delays: Crippling operational cash flow for small vendors.
+
+THE UPAY LOCAL MODERNIZATION SOLUTION:
+1. Zero Hardware Costs:
+   - Any commodity Android or iOS smartphone functions as an intelligent POS.
+   - Dynamic Smart QR generation with audible payment confirmation (voice soundbox).
+2. 0% MDR on Domestic Direct Bank Rails:
+   - Domestic transactions clear instantly with zero interchange fees.
+   - Retailer keeps 100% of the sale value.
+3. Seamless Tourism & Foreign Card Acceptance:
+   - Overseas visitors scan the local UPay QR code with their home wallet.
+   - Customer pays in USD, EUR, or GBP; the local merchant is credited in local
+     currency (e.g., INR) within 250 milliseconds.
+   - Processing fee: 0.75% – 0.85% (saving merchants up to 75% compared to legacy cards).
+4. BLE Mesh Offline Continuity:
+   - If local mobile network towers or Wi-Fi go offline during storms or outages,
+     transactions sign peer-to-peer over Bluetooth mesh and clear upon reconnect.
+
+
+================================================================================
+8. OPENCLAW AGENTIC COMMERCE SKILL SPECIFICATION
+================================================================================
+
+Integrating UPay with OpenClaw transforms the payment gateway into an autonomous
+conversational checkout agent across WhatsApp, Telegram, Slack, and Web.
+
+SKILL MANIFEST (skills/upay-checkout/SKILL.md):
+--------------------------------------------------------------------------------
+---
+name: upay_autonomous_checkout
+description: Execute multi-rail payments, check transaction states, and manage autonomous agent micro-spending via UPay API and uSafe SSO.
+version: 1.0.0
+author: UPay Architecture Team
+tools:
+  - name: create_payment_intent
+    description: Generate an AI-routed payment intent and return local currency breakdown and checkout link.
+    parameters:
+      type: object
+      properties:
+        amount:
+          type: number
+          description: Base purchase amount.
+        currency:
+          type: string
+          description: 3-letter currency code (USD, INR, EUR, GBP).
+        order_ref:
+          type: string
+          description: Merchant invoice or order ID.
+        preferred_display_currency:
+          type: string
+          description: Customer's local fiat currency (default: INR).
+      required: [amount, currency, order_ref]
+  - name: check_settlement_status
+    description: Query the real-time settlement status of a transaction.
+    parameters:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+      required: [transaction_id]
+---
+
+# Agent Instructions:
+1. When user requests to pay or purchase in chat:
+   - Obtain user authorization via uSafe SSO zkJWT token.
+   - Call `create_payment_intent` with required parameters.
+   - Present the dual-currency comparison: e.g. "$45.00 USD ~ Rs. 3,764.70 INR".
+   - Return one-touch biometric authorization link to user.
+2. When executing autonomous AI micro-tasks (< $3.00):
+   - Check if agent daily budget cap allows the charge.
+   - Settle automatically via gasless micro-pay rail; report transaction hash.
+--------------------------------------------------------------------------------
+
+TOOL RUNTIME (skills/upay-checkout/index.js):
+--------------------------------------------------------------------------------
+import axios from 'axios';
+
+const UPAY_API_BASE = process.env.UPAY_API_BASE || 'https://api.upay.usafe.in/v1';
+const USAFE_ZK_TOKEN = process.env.USAFE_ZK_TOKEN;
+
+export async function create_payment_intent({ amount, currency, order_ref, preferred_display_currency = 'INR' }) {
+  try {
+    const response = await axios.post(
+      `${UPAY_API_BASE}/checkout/create`,
+      {
+        merchant_id: process.env.UPAY_MERCHANT_ID,
+        order_reference: order_ref,
+        amount,
+        currency,
+        preferred_display_currency,
+        user_device_context: { client: 'OpenClaw-Agent', biometric_supported: true }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${USAFE_ZK_TOKEN}`,
+          'X-UPay-Api-Key': process.env.UPAY_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const { session_id, ai_routing_decision } = response.data;
+    return {
+      success: true,
+      sessionId: session_id,
+      localDue: `${ai_routing_decision.display_symbol}${ai_routing_decision.total_in_local_currency}`,
+      optimalRail: ai_routing_decision.optimal_rail,
+      fxRateLocked: ai_routing_decision.fx_rate_locked,
+      checkoutUrl: `https://checkout.usafe.in/pay/${session_id}`
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message
+    };
+  }
+}
+--------------------------------------------------------------------------------
+
+
+================================================================================
+9. UCHAT V1 MESSAGING INTEGRATION & IN-CHAT P2P SETTLEMENT
+================================================================================
+
+uChat v1 leverages edge language models, post-quantum encryption, and local-first
+architecture. UPay integrates directly into the chat engine to provide 
+frictionless peer-to-peer and group expense settlements.
+
+Features:
+1. In-Chat Slash Commands (/pay):
+   - Users can execute transfers directly: `/pay @username 500 INR` or `/pay @username 20 USD`.
+   - Generates an interactive chat bubble with live conversion rates.
+2. Group Expense Splitting & Shared Canvases:
+   - When collaborating in group chats, shared bills or trip expenses are automatically
+     tallied and split across members.
+   - Each participant taps a single "Settle Share" button to complete their portion.
+3. Biometric Passkey in Chat Sheet:
+   - The user never leaves uChat. The OS biometric prompt (Touch ID/Face ID)
+     authenticates the transaction directly via uSafe SSO.
+4. Cryptographic Proof Alignment:
+   - Transacted receipts include zero-knowledge proofs confirming compliance
+     without exposing bank account details or card numbers inside chat histories.
+
+
+================================================================================
+10. REST API & WEBHOOK TECHNICAL SPECIFICATIONS (V1)
+================================================================================
+
+ENDPOINT 1: POST /v1/checkout/create
+Headers:
+  Authorization: Bearer <uSafe_zkJWT_Token>
+  X-UPay-Api-Key: <upay_pub_or_sec_key>
+  Content-Type: application/json
+
+Request Body:
+{
+  "merchant_id": "mer_usafe_88301",
+  "order_reference": "ORD_2026_9941",
+  "amount": 49.00,
+  "currency": "USD",
+  "preferred_display_currency": "INR",
+  "user_device_context": {
+    "network_latency_ms": 38,
+    "ip_country": "IND",
+    "biometric_supported": true
+  }
+}
+
+Response (200 OK):
+{
+  "status": "success",
+  "session_id": "sess_upay_01j8f9a2k",
+  "ai_routing_decision": {
+    "optimal_rail": "UPI_INSTANT_DIRECT",
+    "fallback_rail": "GLOBAL_STABLE_LIQUIDITY",
+    "fx_rate_locked": 83.66,
+    "total_in_local_currency": 4099.34,
+    "display_symbol": "Rs.",
+    "rate_guarantee_seconds": 30,
+    "risk_score": 0.02
+  },
+  "checkout_url": "https://checkout.usafe.in/pay/sess_upay_01j8f9a2k"
+}
+
+--------------------------------------------------------------------------------
+ENDPOINT 2: POST /v1/checkout/confirm
+Headers:
+  Authorization: Bearer <uSafe_zkJWT_Token>
+  Content-Type: application/json
+
+Request Body:
+{
+  "session_id": "sess_upay_01j8f9a2k",
+  "auth_signature": "0x7b2a99c4d28e...enclave_signature",
+  "selected_payment_rail": "UPI_INSTANT_DIRECT"
+}
+
+Response (200 OK):
+{
+  "transaction_id": "tx_upay_7781029",
+  "status": "SETTLED",
+  "amount_debited_local": "Rs. 4,099.34",
+  "amount_credited_merchant": "$49.00 USD",
+  "execution_duration_ms": 178,
+  "receipt_hash": "0x89eaf01c37bd99...zkproof"
+}
+
+--------------------------------------------------------------------------------
+WEBHOOK SCHEMA: transaction.settled
+Delivered to Merchant Webhook URL with HMAC-SHA256 signature in X-UPay-Signature.
+
+{
+  "event_id": "evt_01j8f9z8",
+  "event_type": "transaction.settled",
+  "timestamp": 1787898012,
+  "data": {
+    "transaction_id": "tx_upay_7781029",
+    "order_reference": "ORD_2026_9941",
+    "merchant_id": "mer_usafe_88301",
+    "settlement_currency": "USD",
+    "settled_amount": 49.00,
+    "fee_deducted": 0.29,
+    "net_amount": 48.71,
+    "settlement_rail": "UPI_INSTANT_DIRECT",
+    "receipt_hash": "0x89eaf01c37bd99...zkproof"
+  }
+}
+
+
+================================================================================
+11. COMMERCIAL PRICING ARCHITECTURE & 3-YEAR FINANCIAL MODEL
+================================================================================
+
+MERCHANT PRICING TIERS:
++---------------------+---------------+-------------------+---------------------+------------------+
+| Plan Tier           | Monthly Base  | Domestic Rails    | Cross-Border Multi  | Micro-Pay (< $3) |
++---------------------+---------------+-------------------+---------------------+------------------+
+| Starter / Indie     | $0 / mo       | 0.65% + $0.05     | 0.99% + $0.15       | $0.010 flat      |
+| Growth / Pro        | $49 / mo      | 0.50% + $0.05     | 0.85% + $0.10       | $0.005 flat      |
+| Scale / High-Volume | $199 / mo     | 0.40% + $0.03     | 0.75% + $0.08       | $0.003 flat      |
+| Enterprise Custom   | $999+ / mo    | 0.30% + $0.02     | 0.60% + $0.05       | Custom Tiered    |
+| Autonomous Agent    | $19 / mo+use  | 0.45% + $0.02     | 0.70% + $0.05       | $0.002 flat      |
++---------------------+---------------+-------------------+---------------------+------------------+
+
+3-YEAR FINANCIAL PROJECTIONS SUMMARY ($ IN THOUSANDS):
+--------------------------------------------------------------------------------
+Financial Metric                      Year 1 (2027)    Year 2 (2028)    Year 3 (2029)
+--------------------------------------------------------------------------------
+Active Merchants (Year-End)                   1,430            5,885           18,150
+Total Processed Volume (TPV)               $110,000         $650,000       $1,850,000
+
+1. Domestic Rail Gateway Revenue            $343.20        $2,028.00        $5,772.00
+2. Cross-Border Multi-Rail Revenue          $242.00        $1,430.00        $4,070.00
+3. Micro-Transaction Gateway Fees           $137.50          $812.50        $2,312.50
+4. AI Agent & M2M Processing Fees            $55.00          $325.00          $925.00
+5. Dynamic FX Spread (25 bps)                $68.75          $406.25        $1,156.25
+6. Merchant SaaS Subscriptions              $195.00        $1,120.00        $4,350.00
+7. zkKYC & Add-On Platform Fees              $45.00          $280.00        $1,150.00
+8. Float Treasury Yield Share                $35.00          $240.00          $980.00
+--------------------------------------------------------------------------------
+TOTAL GROSS REVENUE                       $1,121.45        $6,641.75       $20,715.75
+Total Cost of Goods Sold (COGS)             $409.00        $2,243.50        $6,392.50
+--------------------------------------------------------------------------------
+GROSS PROFIT                                $712.45        $4,398.25       $14,323.25
+Gross Margin %                                63.5%            66.2%            69.1%
+
+Total Operating Expenses (OpEx)           $1,320.00        $3,770.00        $8,020.00
+--------------------------------------------------------------------------------
+EBITDA / OPERATING PROFIT                  -$607.55          $628.25        $6,303.25
+EBITDA Margin %                              -54.2%             9.5%            30.4%
+--------------------------------------------------------------------------------
+
+================================================================================
+END OF BLUEPRINT SPECIFICATION — UPAY PLATFORM 2030
+================================================================================
+"""
+
+file_path = "UPay_Complete_System_Blueprint_2030.txt"
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(blueprint_content)
+
+print(f"File created successfully: {file_path}, Size: {len(blueprint_content)} characters")
